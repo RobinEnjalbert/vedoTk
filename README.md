@@ -13,7 +13,7 @@ pip install .
 
 ## Usage
 
-# Folder inspection
+### Folder inspection
 
 This tool allows you to easily explore the mesh files contents in a repository. 
 The window displays the loaded meshes one by one, and you can switch between files with buttons.
@@ -25,7 +25,7 @@ FolderInspection('examples/resources')
 See `examples/folder_inspection.py`.
 
 
-# Mesh selection
+### Mesh selection
 
 This tool allows you to easily select cells of a surface mesh with the mouse.
 The indices and positions can be saved in a `.npy` file.
@@ -37,7 +37,7 @@ MeshSelection('examples/resources/raptor.obj').launch()
 See `examples/mesh_selection.py`.
 
 
-## Visible points
+### Visible points
 
 This tool allows you to extract the visible points of a Mesh depending on the virtual camera parameters.
 This tool should be used when the extraction is done offscreen (otherwise, use `vedo.visible_pints`).
