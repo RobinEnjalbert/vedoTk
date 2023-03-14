@@ -1,4 +1,4 @@
-from typing import Optional, TypeVar, List, Tuple
+from typing import Optional, TypeVar, List, Tuple, Union
 
 from numpy import ndarray, array
 from numpy import round as np_round
@@ -12,16 +12,17 @@ TVisiblePoints = TypeVar('TVisiblePoints', bound='VisiblePoints')
 class VisiblePoints:
 
     def __init__(self,
-                 mesh: Mesh):
+                 mesh: Union[Mesh, List[ndarray, ndarray]]):
         """
         Extract the visible nodes of a mesh depending on the camera parameters.
         If using in a plotter instance, use vedo.visible_points instead.
 
-        :param mesh: Mesh to compute visible surface extraction.
+        :param mesh: Mesh to compute visible surface extraction. Either a vedo.Mesh instance or a list containing the
+                     positions array and the cells array sucha as [positions_array, cells_array].
         """
 
         # Mesh information
-        self.__mesh: Mesh = mesh
+        self.__mesh: Mesh = mesh if type(mesh) == Mesh else Mesh(mesh)
         self.__visible_points: ndarray = array([])
         self.__indices_visible_points: List[int] = []
 
