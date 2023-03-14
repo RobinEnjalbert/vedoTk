@@ -1,22 +1,26 @@
-from os import listdir
-from os.path import isfile
+from typing import Optional
+from os import getcwd, listdir
+from os.path import isfile, abspath, join, sep
 from vedo import Plotter, Mesh, Text2D
 
 
 class FolderInspection:
 
     def __init__(self,
+                 directory: Optional[str] = None,
                  one_by_one: bool = True):
 
         self.meshes = []
         self.filenames = []
         self.default_alpha = 0. if one_by_one else 0.1
-        for file in sorted([f for f in listdir() if isfile(f)]):
-            try:
-                self.meshes.append(Mesh(file, alpha=self.default_alpha))
-                self.filenames.append(file)
-            except:
-                pass
+        directory = getcwd() if directory is None else abspath(directory)
+        for file in sorted(listdir(directory)):
+            if isfile(file := join(directory, file)):
+                try:
+                    self.meshes.append(Mesh(file, alpha=self.default_alpha, c='y5').linecolor('y2'))
+                    self.filenames.append(file.split(sep)[-1])
+                except:
+                    pass
         if len(self.meshes) == 0:
             raise ValueError("This directory does not contain any mesh file.")
         self.mesh_id = 0
