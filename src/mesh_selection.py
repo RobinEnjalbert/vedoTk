@@ -122,13 +122,14 @@ class MeshSelection(Plotter):
         self.indicator.text(f'Nb selected cells: {len(self.selected_cells)}')
         self.update_mesh_colors()
 
-    def save(self):
+    def save(self,
+             filename: Optional[str] = None):
         """
         Save the current selection.
         """
 
         # Indexing file
-        filename = 'mesh_selection'
+        filename = 'mesh_selection' if filename is None else filename
         if exists(join(self.mesh_dir, f'{filename}.npy')):
             nb_file = len([file for file in listdir(self.mesh_dir) if file[:len(filename)] == filename])
             filename = f'{filename}_{nb_file}'
