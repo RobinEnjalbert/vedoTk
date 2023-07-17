@@ -12,7 +12,7 @@ class Scene:
         self.visible_points_extractor = VisiblePoints(mesh=self.mesh)
 
         self.plt = Plotter(interactive=False)
-        self.plt.add_button(self.__capture, states=['Capture'], bc=['r3'])
+        self.plt.add_button(self.__capture, states=['Capture'], c=['w'], bc=['r3'])
         self.plt.render().add(self.mesh, self.visible_points)
         self.plt.show()
         self.plt.interactive()
@@ -25,7 +25,7 @@ class Scene:
         pcd, _ = self.visible_points_extractor.extract()
         self.plt.remove(self.visible_points)
         self.visible_points = Points(pcd)
-        self.plt.add(self.visible_points, render=True)
+        self.plt.add(self.visible_points).render()
 
 
 Scene()

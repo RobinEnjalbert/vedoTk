@@ -29,8 +29,8 @@ class FolderInspection:
         self.meshes[0].alpha(1.)
         self.text = Text2D(txt=self.filenames[0], pos='bottom_middle')
         self.plotter.add(self.text)
-        self.plotter.add_button(fnc=self.__previous_file, states=['<'], bc=['red3'], pos=[0.1, 0.05])
-        self.plotter.add_button(fnc=self.__next_file, states=['>'], bc=['red3'], pos=[0.9, 0.05])
+        self.plotter.add_button(fnc=self.__previous_file, states=['<'], c=['w'], bc=['red3'], pos=[0.1, 0.05])
+        self.plotter.add_button(fnc=self.__next_file, states=['>'], c=['w'], bc=['red3'], pos=[0.9, 0.05])
 
         self.plotter.show(interactive=True).close()
 
