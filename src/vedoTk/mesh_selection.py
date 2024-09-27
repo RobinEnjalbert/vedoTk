@@ -1,5 +1,5 @@
 from typing import Optional
-from os import listdir
+from os import listdir, remove
 from os.path import join, abspath, pardir, exists
 from numpy import array, load, save, unique
 from vedo import Plotter, Mesh, Text2D
@@ -123,7 +123,8 @@ class MeshSelection(Plotter):
         self.update_mesh_colors()
 
     def save(self,
-             filename: Optional[str] = None):
+             filename: Optional[str] = None,
+             overwrite: bool = False):
         """
         Save the current selection.
         """
@@ -131,8 +132,11 @@ class MeshSelection(Plotter):
         # Indexing file
         filename = 'mesh_selection' if filename is None else filename
         if exists(join(self.mesh_dir, f'{filename}.npy')):
-            nb_file = len([file for file in listdir(self.mesh_dir) if file[:len(filename)] == filename])
-            filename = f'{filename}_{nb_file}'
+            if overwrite:
+                remove(join(self.mesh_dir, f'{filename}.npy'))
+            else:
+                nb_file = len([file for file in listdir(self.mesh_dir) if file[:len(filename)] == filename])
+                filename = f'{filename}_{nb_file}'
 
         # Save selection
         save(join(self.mesh_dir, filename), array(self.selected_cells, dtype=int))
