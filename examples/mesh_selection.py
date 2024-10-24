@@ -3,7 +3,7 @@ from os import remove
 from vedoTk import MeshSelection
 
 # Selection from scratch
-mesh_file = join('resources', 'armadillo.obj')
+mesh_file = join('resources', 'raptor.obj')
 selection_file = join('resources', 'mesh_selection.npy')
 plt = MeshSelection(mesh_file=mesh_file)
 plt.launch()

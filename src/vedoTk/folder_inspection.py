@@ -34,14 +34,14 @@ class FolderInspection:
 
         self.plotter.show(interactive=True).close()
 
-    def __previous_file(self):
+    def __previous_file(self, obj, ename):
         self.meshes[self.mesh_id].alpha(self.default_alpha)
         self.mesh_id = (self.mesh_id - 1) % len(self.meshes)
         self.meshes[self.mesh_id].alpha(1.)
         self.text.text(self.filenames[self.mesh_id])
         self.plotter.render()
 
-    def __next_file(self):
+    def __next_file(self, obj, ename):
         self.meshes[self.mesh_id].alpha(self.default_alpha)
         self.mesh_id = (self.mesh_id + 1) % len(self.meshes)
         self.meshes[self.mesh_id].alpha(1.)

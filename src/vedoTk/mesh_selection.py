@@ -33,6 +33,7 @@ class MeshSelection(Plotter):
         # Cursor to access 3D coordinates of the mesh
         self.id_cursor = -1
         self.drag_mode = False
+        self.__saved = True
 
         # Create mouse and keyboard callbacks
         self.add_callback('KeyPress', self.__callback_key_press)
@@ -64,6 +65,7 @@ class MeshSelection(Plotter):
 
         # Launch Plotter
         self.show(**kwargs).close()
+        self.save()
 
     def update_mesh_colors(self, color_cursor: bool = True):
         """
@@ -91,6 +93,7 @@ class MeshSelection(Plotter):
             self.selected_cells.append(id_cell)
             self.indicator.text(f'Nb selected cells: {len(self.selected_cells)}')
             self.update_mesh_colors()
+            self.__saved = False
 
     def remove_cell(self, id_cell: int):
         """
@@ -129,17 +132,20 @@ class MeshSelection(Plotter):
         Save the current selection.
         """
 
-        # Indexing file
-        filename = 'mesh_selection' if filename is None else filename
-        if exists(join(self.mesh_dir, f'{filename}.npy')):
-            if overwrite:
-                remove(join(self.mesh_dir, f'{filename}.npy'))
-            else:
-                nb_file = len([file for file in listdir(self.mesh_dir) if file[:len(filename)] == filename])
-                filename = f'{filename}_{nb_file}'
+        if not self.__saved:
 
-        # Save selection
-        save(join(self.mesh_dir, filename), array(self.selected_cells, dtype=int))
+            # Indexing file
+            filename = 'mesh_selection' if filename is None else filename
+            if exists(join(self.mesh_dir, f'{filename}.npy')):
+                if overwrite:
+                    remove(join(self.mesh_dir, f'{filename}.npy'))
+                else:
+                    nb_file = len([file for file in listdir(self.mesh_dir) if file[:len(filename)] == filename])
+                    filename = f'{filename}_{nb_file}'
+
+            # Save selection
+            save(join(self.mesh_dir, filename), array(self.selected_cells, dtype=int))
+            self.__saved = True
 
     def get_selected_cells_id(self):
         """
@@ -153,7 +159,8 @@ class MeshSelection(Plotter):
         Get the values of the selected cells.
         """
 
-        return array(self.mesh.cells())[self.get_selected_cells_id()]
+
+        return array(self.mesh.cells)[list(self.get_selected_cells_id())]
 
     def get_selected_points_id(self):
         """
@@ -167,7 +174,7 @@ class MeshSelection(Plotter):
         Get the values of the selected points.
         """
 
-        return array(self.mesh.points())[self.get_selected_points_id()]
+        return array(self.mesh.vertices)[self.get_selected_points_id()]
 
     def __callback_key_press(self, event):
         """
@@ -175,19 +182,19 @@ class MeshSelection(Plotter):
         """
 
         # If 's' pressed, switch drag_mode flag
-        if event.keyPressed == 'd':
+        if event.keypress == 'd':
             self.drag_mode = not self.drag_mode
 
         # If 'z' pressed, remove the last selected cell
-        elif event.keyPressed == 'z' and len(self.selected_cells) > 0:
+        elif event.keypress == 'z' and len(self.selected_cells) > 0:
             self.remove_last_cell()
 
         # If 'c' pressed, clear the selection
-        elif event.keyPressed == 'c':
+        elif event.keypress == 'c':
             self.remove_all_cells()
 
         # If 's' pressed, save the selection
-        elif event.keyPressed == 's':
+        elif event.keypress == 's':
             self.save()
 
     def __callback_mouse_move(self, event):

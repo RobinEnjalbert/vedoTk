@@ -4,7 +4,7 @@ from numpy import ndarray, array
 from numpy import round as np_round
 from numpy.linalg import norm
 from threading import Thread
-from vedo import Mesh, show, visible_points
+from vedo import Mesh, show
 
 TVisiblePoints = TypeVar('TVisiblePoints', bound='VisiblePoints')
 
@@ -75,7 +75,7 @@ class VisiblePoints:
         # Format the camera with position and focal point, extract visible nodes
         cam = dict(pos=self._camera_position, focalPoint=self._focal_point, viewAngle=self._view_angle)
         plt = show(mesh, new=True, camera=cam, offscreen=True)
-        visible_pcd = visible_points(mesh)
+        visible_pcd = mesh.visible_points()
         plt.close()
 
         # Build visible node indices and position list filtered with distance to camera

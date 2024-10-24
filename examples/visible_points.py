@@ -18,7 +18,7 @@ class Scene:
         self.plt.interactive()
         self.plt.close()
 
-    def __capture(self):
+    def __capture(self, obj, ename):
         self.visible_points_extractor.set_camera(camera_position=self.plt.camera.GetPosition(),
                                                  focal_point=self.plt.camera.GetFocalPoint(),
                                                  view_angle=self.plt.camera.GetViewAngle())
