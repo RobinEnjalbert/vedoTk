@@ -1,3 +1,3 @@
 from vedoTk.folder_inspection import FolderInspection
-from vedoTk.mesh_selection import MeshSelection
+from vedoTk.mesh_selection import MeshPointsSelection, MeshCellsSelection
 from vedoTk.visible_points import VisiblePoints
