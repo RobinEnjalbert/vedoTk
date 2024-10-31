@@ -5,9 +5,13 @@ A Python toolbox based on [vedo](https://github.com/marcomusy/vedo) for 3D objec
 ## Installation
 
 ```bash
-git clone https://github.com/RobinEnjalbert/vedoTk.git
-cd vedoTk
-pip install .
+# Option 1 (USERS): install with pip
+$ pip install git+https://github.com/RobinEnjalbert/vedoTk.git
+
+# Option 2 (DEVS): install as editable
+$ git clone https://github.com/RobinEnjalbert/vedoTk.git
+$ cd vedoTk
+$ pip install -e .
 ```
 
 
@@ -27,14 +31,14 @@ See `examples/folder_inspection.py`.
 
 ### Mesh selection
 
-This tool allows you to easily select cells of a surface mesh with the mouse.
+This tool allows you to easily select cells or points from a surface mesh with the mouse.
 The indices and positions can be saved in a `.npy` file.
 ```python
-from vedoTk import MeshSelection
-MeshSelection('examples/resources/raptor.obj').launch()
+from vedoTk import MeshCellsSelection
+MeshCellsSelection('examples/resources/raptor.obj').launch()
 ```
 ![mesh_selection](examples/img/mesh_selection.png)
-See `examples/mesh_selection.py`.
+See `examples/mesh_points_selection.py` and `examples/mesh_cells_selection.py`.
 
 
 ### Visible points
