@@ -95,8 +95,8 @@ class MeshPointsSelection(Plotter):
         Get the coordinates of the selected points.
         """
 
-        if len(self.selected_points_id) > 0:
-            return self.__points.vertices[self.selected_points_id]
+        if len(self.__selection) > 0:
+            return self.__points.vertices[array(list(self.__selection), dtype=int)]
         return array([])
 
     def launch(self, **kwargs) -> None:
