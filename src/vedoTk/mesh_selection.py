@@ -1,9 +1,10 @@
 from typing import Optional, List
 from os import listdir, remove
 from os.path import join, abspath, exists, sep, dirname
-from numpy import array, ndarray, load, save, unique, dot, argwhere, mean
-from vedo import Plotter, Mesh, Points, Text2D, settings
+from numpy import array, ndarray, arange, load, save, unique, dot, argwhere, mean
+from vedo import Plotter, Mesh, Points, Text2D, settings, TetMesh
 from vedo.colors import get_color
+from vtk import vtkGeometryFilter
 
 
 class MeshPointsSelection(Plotter):
@@ -21,16 +22,44 @@ class MeshPointsSelection(Plotter):
 
         self.__mesh_file = mesh_file
         self.__selection_file = selection_file
+        self.__tet_mesh_ids = None
 
-        # Create the mesh and the point cloud
-        self.__mesh = Mesh(self.__mesh_file).compute_normals()
-        self.__mesh.lw(1).c('grey')
+        # Create the surface mesh
+        try:
+            self.__mesh = Mesh(self.__mesh_file).compute_normals().lw(1).c('grey')
+
+        # In case of tetra mesh, create a surface mesh and keep vertex ids correspondences
+        except TypeError:
+            # Load tetra mesh and extract triangle surface
+            __tet_mesh = TetMesh(self.__mesh_file)
+            gf = vtkGeometryFilter()
+            gf.SetInputData(__tet_mesh.dataset)
+            gf.Update(0)
+            self.__mesh = Mesh(gf.GetOutput()).compute_normals().lw(1).c('grey')
+            # Compute correspondences between vertices ids
+            pts = Points(__tet_mesh.vertices)
+            self.__tet_mesh_ids = []
+            for v in self.__mesh.vertices:
+                self.__tet_mesh_ids.append(pts.closest_point(v, return_point_id=True))
+            self.__tet_mesh_ids = array(self.__tet_mesh_ids, dtype=int)
+
+        # Create the point cloud
         self.__points = Points(self.__mesh.vertices).point_size(8)
 
         # Default selection of the point cloud
         color = array(list(get_color('lightgreen')) + [1.]) * 255
         self.__default_color = array([color for _ in range(self.__points.nvertices)])
-        self.__selection = set([]) if self.__selection_file is None else set(load(self.__selection_file).tolist())
+
+        # Load any existing selection file
+        if self.__selection_file is None:
+            self.__selection = set([])
+        elif self.__tet_mesh_ids is None:
+            self.__selection = set(load(self.__selection_file).tolist())
+        else:
+            tet_ids = set(load(self.__selection_file).tolist())
+            self.__selection = set([self.__tet_mesh_ids.tolist().index(i) for i in tet_ids])
+
+
         self.__info = Text2D('Nb selected point: 0', pos='bottom-left', s=0.7)
         self.__cursor = set([])
         self.__undo = set([])
@@ -44,7 +73,8 @@ class MeshPointsSelection(Plotter):
 
         # Selection radius slider
         self.__radius = 0.
-        self.add_slider(sliderfunc=self.__callback_slider, xmin=0, xmax=self.__mesh.diagonal_size() * 0.1)
+        self.add_slider(sliderfunc=self.__callback_slider, xmin=0, xmax=self.__mesh.diagonal_size() * 0.1,
+                        show_value=False, title='Selection Radius', title_size=0.8)
 
     @property
     def selected_points_id(self) -> ndarray:
@@ -52,7 +82,12 @@ class MeshPointsSelection(Plotter):
         Get the ids of the selected points.
         """
 
-        return array(list(self.__selection))
+        # Tetra mesh: convert vertices index
+        if self.__tet_mesh_ids is not None:
+            return self.__tet_mesh_ids[array(list(self.__selection))]
+
+        # Surface mesh: simply return selection
+        return array(list(self.__selection), dtype=int)
 
     @property
     def selected_points_coord(self) -> ndarray:
@@ -75,9 +110,11 @@ class MeshPointsSelection(Plotter):
                        "  Left click: add a point to selection\n" \
                        "  Right click: remove a point from selection\n\n" \
                        "KEYBOARD CONTROL\n" \
-                       "  'z': remove the last selected point\n" \
-                       "  'c': clear the selection\n" \
-                       "  'd': switch between 'click' and 'draw' modes\n"
+                       "  'Ctrl+z': remove the last selected point\n" \
+                       "  'Ctrl+c': clear the selection\n" \
+                       "  'Ctrl+d': switch between 'click' and 'draw' modes\n" \
+                       "  'Ctrl+a': select all the points\n" \
+                       "  'Ctrl+i ': invert the selection"
         self.add(Text2D(txt=instructions, pos='top-left', s=0.6, bg='grey', c='white', alpha=0.9))
         self.add(self.__info)
 
@@ -120,7 +157,7 @@ class MeshPointsSelection(Plotter):
                 file = join(filedir, f'{filename}_{nb_file}')
 
         # Save selection
-        save(f'{file}.npy', array(list(self.__selection), dtype=int))
+        save(f'{file}.npy', self.selected_points_id)
         print(f'Saved selection at {file}.npy')
 
     def __update(self, color_cursor: bool = True) -> None:
@@ -215,19 +252,29 @@ class MeshPointsSelection(Plotter):
         KeyPressEvent callback.
         """
 
-        # 'z' pressed: remove the last selected cell
-        if event.keypress == 'z' and len(self.__selection) > 0:
+        # 'ctrl+z' pressed: remove the last selected points
+        if event.keypress == 'Ctrl+z' and len(self.__selection) > 0:
             self.__selection = self.__selection.difference(self.__undo)
             self.__update()
 
-        # 'c' pressed: clear the selection
-        elif event.keypress == 'c':
+        # 'ctrl+c' pressed: clear the selection
+        elif event.keypress == 'Ctrl+c':
             self.__selection = set([])
             self.__update()
 
-        # 'd' pressed: switch draw flag
-        if event.keypress == 'd':
+        # 'ctrl+d' pressed: switch draw flag
+        elif event.keypress == 'Ctrl+d':
             self.__draw_mode = not self.__draw_mode
+
+        # 'ctrl+a' pressed: select all the vertices
+        elif event.keypress == 'Ctrl+a':
+            self.__selection = set(arange(self.__points.nvertices))
+            self.__update()
+
+        # 'ctrl+i' pressed: invert the selection
+        elif event.keypress == 'Ctrl+i':
+            self.__selection = set(arange(self.__points.nvertices)) - self.__selection
+            self.__update()
 
 
 class MeshCellsSelection(Plotter):
@@ -267,7 +314,8 @@ class MeshCellsSelection(Plotter):
 
         # Selection radius slider
         self.__radius = 0.
-        self.add_slider(sliderfunc=self.__callback_slider, xmin=0, xmax=int(self.__mesh.diagonal_size() * 0.1))
+        self.add_slider(sliderfunc=self.__callback_slider, xmin=0, xmax=self.__mesh.diagonal_size() * 0.1,
+                        show_value=False, title='Selection radius', title_size=0.8)
 
         # Define the cells centers point cloud
         self.__points = Points(mean(self.__mesh.vertices[self.__mesh.cells], axis=1))
