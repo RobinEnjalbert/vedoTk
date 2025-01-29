@@ -45,6 +45,7 @@ class MeshPointsSelection(Plotter):
 
         # Create the point cloud
         self.__points = Points(self.__mesh.vertices).point_size(8)
+        self.__rad_points = Points().point_size(8).color('tomato')
 
         # Default selection of the point cloud
         color = array(list(get_color('lightgreen')) + [1.]) * 255
@@ -75,6 +76,8 @@ class MeshPointsSelection(Plotter):
         self.__radius = 0.
         self.add_slider(sliderfunc=self.__callback_slider, xmin=0, xmax=self.__mesh.diagonal_size() * 0.1,
                         show_value=False, title='Selection Radius', title_size=0.8)
+        self.add_slider(sliderfunc=self.__callback_radius, xmin=8, xmax=30, show_value=False, title='Point Radius',
+                        title_size=0.8, pos='bottom-left')
 
     @property
     def selected_points_id(self) -> ndarray:
@@ -119,7 +122,7 @@ class MeshPointsSelection(Plotter):
         self.add(self.__info)
 
         # Add the data to the Plotter and color existing selection
-        self.add(self.__mesh, self.__points)
+        self.add(self.__mesh, self.__points, self.__rad_points)
         self.__update()
 
         # Launch the Plotter
@@ -178,6 +181,10 @@ class MeshPointsSelection(Plotter):
         # Update
         self.__points.pointcolors = colors
         self.__info.text(f'Nb selected points: {len(self.__selection)}')
+        if len(ids) > 1:
+            self.remove(self.__rad_points)
+            self.__rad_points = Points(self.__points.vertices[list(ids)], c='tomato', r=self.__rad_points.point_size())
+            self.add(self.__rad_points)
         self.render()
 
     def __get_closest_points(self, picked: ndarray) -> List[int]:
@@ -204,6 +211,14 @@ class MeshPointsSelection(Plotter):
         """
 
         self.__radius = widget.value
+
+    def __callback_radius(self, widget, event) -> None:
+        """
+        Slider callback.
+        """
+
+        self.__rad_points.point_size(widget.value)
+        self.render()
 
     def __callback_mouse_move(self, event) -> None:
         """
