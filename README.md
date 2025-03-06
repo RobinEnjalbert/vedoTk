@@ -23,7 +23,7 @@ This tool allows you to easily explore the mesh files contents in a repository.
 The window displays the loaded meshes one by one, and you can switch between files with buttons.
 ```python
 from vedoTk import FolderInspection
-FolderInspection('examples/resources')
+FolderInspection(path='examples/resources', extension='.obj')
 ```
 ![folder_inspection](examples/img/folder_inspection.png)
 See `examples/folder_inspection.py`.
@@ -31,24 +31,25 @@ See `examples/folder_inspection.py`.
 
 ### Mesh selection
 
-This tool allows you to easily select cells or points from a surface mesh with the mouse.
+This tool allows you to easily select vertices from a surface mesh with the mouse.
 The indices and positions can be saved in a `.npy` file.
 ```python
-from vedoTk import MeshCellsSelection
-MeshCellsSelection('examples/resources/raptor.obj').launch()
+from vedoTk import MeshSelection
+plt = MeshSelection(mesh='examples/resources/raptor.obj')
+plt.launch()
+plt.save('selection.npy')
 ```
 ![mesh_selection](examples/img/mesh_selection.png)
-See `examples/mesh_points_selection.py` and `examples/mesh_cells_selection.py`.
+See `examples/mesh_selection.py`.
 
 
-### Visible points
+### Non-rigid registration
 
-This tool allows you to extract the visible points of a Mesh depending on the virtual camera parameters.
-This tool should be used when the extraction is done offscreen (otherwise, use `vedo.visible_pints`).
+This tool allows you to compute a non-rigid registration between a source and a target mesh using markers and ICP.
+The registration requires SOFA bindings.
 ```python
-from vedo import Mesh
-from vedoTk import VisiblePoints
-VisiblePoints(Mesh('examples/resources/armadillo.obj')).extract()
+from vedoTk import register
+register(source=vedo_source_mesh, target=vedo_target_mesh)
 ```
-![visible_points](examples/img/visible_points.png)
-See `examples/visible_points.py`.
+![registration](examples/img/registration.png)
+See `examples/liver_registration.py`.

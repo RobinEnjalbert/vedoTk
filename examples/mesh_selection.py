@@ -1,10 +1,10 @@
 from os.path import join
-from vedoTk import MeshPointsSelection
+from vedoTk import MeshSelection
 
 # Selection from scratch
 mesh_file = join('resources', 'raptor.obj')
-selection_file = join('resources', 'mesh_points_selection.npy')
-plt = MeshPointsSelection(mesh_file=mesh_file)
+selection_file = join('resources', 'mesh_selection.npy')
+plt = MeshSelection(mesh=mesh_file)
 plt.launch()
 plt.save(selection_file=selection_file, overwrite=True)
 

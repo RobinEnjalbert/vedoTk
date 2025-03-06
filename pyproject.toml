@@ -8,5 +8,5 @@ description = "A Python toolbox based on vedo for 3D objects visualization and m
 readme = "README.md"
 authors = [{name= "Robin ENJALBERT"}]
 requires-python = ">=3.10"
-dependencies = ["numpy >= 1.26.4", "vedo >= 2024.5.2"]
+dependencies = ["vtk <= 9.4.0", "numpy >= 1.26.4", "vedo >= 2024.5.2"]
 version = "23.2.23"
